@@ -9,7 +9,7 @@
             "email": "chris@chrisnharvey.com"
         }
     ],
-    "ben": [
+    "bin": [
         "bref-local-kafka"
     ],
     "minimum-stability": "dev",
