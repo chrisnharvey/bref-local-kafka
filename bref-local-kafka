@@ -1,0 +1,66 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__.'/vendor/autoload.php';
+
+use ChrisHarvey\SimpleKafka\Kafka;
+use Bref\Console\Command\Local;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+$app = new Silly\Application();
+
+$app->command('consume [topic] [function] [--handler=] [--config=] [--brokers=] [--group=]', function (
+    ?string $topic,
+    ?string $function,
+    ?string $handler,
+    ?string $config,
+    string $brokers = 'kafka:9092',
+    string $group = 'group',
+    SymfonyStyle $io
+) {
+    if (empty($topic)) {
+        throw new Exception('Please provide a topic to consume');
+    }
+
+    $kafka = new Kafka(explode(',', $brokers));
+
+    $messageId = 1;
+
+    $kafka->consume(
+        $group,
+        $topic,
+        function ($message) use ($function, $handler, $config, $io, &$messageId) {
+            $timestamp = date('Y-m-d H:i:s');
+            $io->writeln("<bg=blue>[{$messageId}] Message received at {$timestamp}</>");
+            $io->writeln("<bg=blue>[{$messageId}] {$message->payload}</>");
+
+            try {
+                return (new Local)(
+                    $function,
+                    $message->payload,
+                    null,
+                    $handler,
+                    $config,
+                    $io
+                );
+            } catch (\Throwable $e) {
+                $this->renderThrowable($e, $io);
+            }
+
+            $io->writeln("<bg=blue>[{$messageId}] Message processed</>");
+            $io->writeln('');
+
+            $messageId++;
+        }
+    );
+});
+
+$app->command('produce [topic] [payload] [--brokers=]', function ($topic, $payload, $brokers = 'kafka:9092') {
+    $kafka = new Kafka(explode(',', $brokers));
+
+    $kafka->produce($topic, $payload);
+});
+
+$app->run();
