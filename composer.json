@@ -1,0 +1,20 @@
+{
+    "name": "chrisnharvey/bref-local-kafka",
+    "description": "Simple Kafka consumer to automatically trigger Bref Lambda functions locally",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Harvey",
+            "email": "chris@chrisnharvey.com"
+        }
+    ],
+    "ben": [
+        "bref-local-kafka"
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "chrisnharvey/php-simple-rdkafka": "dev-master",
+        "bref/bref": "dev-master"
+    }
+}
